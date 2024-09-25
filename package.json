@@ -1,6 +1,8 @@
 {
   "name": "my-nextjs-scraper",
   "version": "1.0.0",
+  "description": "A Next.js scraper for scraping data from a website using Beautiful Soup.",
+  "main": "index.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,7 +12,13 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "axios": "^0.27.2",
-    "jsdom": "^19.0.0"
-  }
+    "axios": "^0.21.1"  // Para fazer requisições HTTP
+  },
+  "devDependencies": {
+    "eslint": "latest",
+    "eslint-config-next": "latest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
 }
