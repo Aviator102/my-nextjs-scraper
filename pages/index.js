@@ -1,39 +1,26 @@
 // pages/index.js
-import { useState } from 'react';
 
-export default function Home() {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+import React from 'react';
 
-    const fetchData = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await fetch('/api/scrape');
-            if (!response.ok) {
-                throw new Error('Erro ao buscar dados');
-            }
-            const result = await response.json();
-            setData(result);
-        } catch (error) {
-            setError(error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+const Home = () => {
+  const handleFetchResults = async () => {
+    const response = await fetch('/api/scrape');
+    const data = await response.json();
+    console.log(data); // Você pode fazer algo com os dados aqui
+  };
 
-    return (
-        <div>
-            <h1>Scraper de Resultados</h1>
-            <button onClick={fetchData}>Buscar Resultados</button>
-            {loading && <p>Carregando...</p>}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <ul>
-                {data.map((item, index) => (
-                    <li key={index}>R: {item.result}, Data: {item.date}</li>
-                ))}
-            </ul>
-        </div>
-    );
-}
+  return (
+    <div style={{ textAlign: 'center', padding: '20px' }}>
+      <h1>My Next.js Scraper</h1>
+      <button onClick={handleFetchResults} style={{ padding: '10px 20px', fontSize: '16px' }}>
+        Buscar Resultados
+      </button>
+      <button onClick={() => window.open('https://scrapingaviator.vercel.app/api/scrape', '_blank')} style={{ padding: '10px 20px', fontSize: '16px', marginLeft: '10px' }}>
+        Acessar API
+      </button>
+      {/* Aqui você pode adicionar uma seção para exibir os resultados */}
+    </div>
+  );
+};
+
+export default Home;
