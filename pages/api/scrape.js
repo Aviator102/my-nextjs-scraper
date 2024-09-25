@@ -1,32 +1,54 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { Builder, By, until } from 'selenium-webdriver';
-import chrome from 'selenium-webdriver/chrome';
-import path from 'path';
+// pages/api/scrape.js
+import axios from 'axios';
+import cheerio from 'cheerio';
+
+// Função para obter a hora atual da API
+const getCurrentTime = async () => {
+    try {
+        const response = await axios.get("https://brasilapi.vercel.app/api/hora");
+        return response.data.hora; // Retorna a hora no formato HH:MM:SS
+    } catch (error) {
+        console.error("Erro ao obter a hora:", error);
+        return null;
+    }
+};
 
 export default async function handler(req, res) {
-  // Configurar o ChromeDriver com opções headless
-  const options = new chrome.Options();
-  options.addArguments('--headless');
-  options.addArguments('--no-sandbox');
-  options.addArguments('--disable-dev-shm-usage');
+    const currentTime = await getCurrentTime();
+    if (!currentTime) {
+        return res.status(500).json({ message: "Não foi possível obter a hora da API." });
+    }
 
-  const driver = await new Builder()
-    .forBrowser('chrome')
-    .setChromeOptions(options)
-    .build();
+    const currentHour = currentTime.split(':').slice(0, 2).join(':'); // Obtém a hora sem os segundos
 
-  try {
-    // Navegar para a URL e realizar o scraping
-    await driver.get('https://www.tipminer.com/historico/betfair/aviator');
-    const results = await driver.wait(until.elementLocated(By.className('cell__result')), 10000);
-    const text = await results.getText();
-    
-    // Retornar o resultado como resposta JSON
-    res.status(200).json({ result: text });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Scraping failed' });
-  } finally {
-    await driver.quit();
-  }
+    try {
+        const url = "https://www.tipminer.com/historico/betfair/aviator";
+        const { data } = await axios.get(url);
+        const $ = cheerio.load(data);
+
+        const checkResults = new Set(); // Para manter controle dos resultados já coletados
+        const results = [];
+        
+        // Coleta resultados
+        $('.cell__result').each((i, element) => {
+            const result = $(element).text().trim();
+            const date = $('.cell__date').eq(i).text().trim(); // Obter a data correspondente
+
+            if (date) {
+                const latestDateTime = date.split(':').slice(0, 2).join(':'); // Obtém a hora sem os segundos
+
+                // Verifica se o horário da última data é maior ou igual à hora atual da API
+                if (latestDateTime >= currentHour && !checkResults.has(result)) {
+                    checkResults.add(result); // Adiciona o resultado ao conjunto
+                    results.push({ result, date }); // Armazena o resultado e a data
+                }
+            }
+        });
+
+        // Retorna os resultados encontrados
+        return res.status(200).json(results);
+    } catch (error) {
+        console.error("Erro ao realizar scraping:", error);
+        return res.status(500).json({ message: "Erro ao processar a requisição." });
+    }
 }
