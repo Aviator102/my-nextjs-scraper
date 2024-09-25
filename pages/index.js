@@ -18,7 +18,6 @@ const Home = () => {
       <button onClick={() => window.open('https://scrapingaviator.vercel.app/api/scrape', '_blank')} style={{ padding: '10px 20px', fontSize: '16px', marginLeft: '10px' }}>
         Acessar API
       </button>
-      {/* Aqui você pode adicionar uma seção para exibir os resultados */}
     </div>
   );
 };
