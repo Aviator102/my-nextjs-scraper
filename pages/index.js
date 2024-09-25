@@ -1,25 +1,28 @@
-// pages/index.js
+import { useEffect, useState } from 'react';
 
-import React from 'react';
+export default function Home() {
+    const [data, setData] = useState([]);
 
-const Home = () => {
-  const handleFetchResults = async () => {
-    const response = await fetch('/api/scrape');
-    const data = await response.json();
-    console.log(data); // Você pode fazer algo com os dados aqui
-  };
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await fetch('/api/scrape');
+            const result = await response.json();
+            setData(result);
+        };
 
-  return (
-    <div style={{ textAlign: 'center', padding: '20px' }}>
-      <h1>My Next.js Scraper</h1>
-      <button onClick={handleFetchResults} style={{ padding: '10px 20px', fontSize: '16px' }}>
-        Buscar Resultados
-      </button>
-      <button onClick={() => window.open('https://scrapingaviator.vercel.app/api/scrape', '_blank')} style={{ padding: '10px 20px', fontSize: '16px', marginLeft: '10px' }}>
-        Acessar API
-      </button>
-    </div>
-  );
-};
+        fetchData();
+    }, []);
 
-export default Home;
+    return (
+        <div>
+            <h1>Resultados do Scraping</h1>
+            <ul>
+                {data.map((item, index) => (
+                    <li key={index}>
+                        <strong>Resultado:</strong> {item.result} | <strong>Data:</strong> {item.date}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
